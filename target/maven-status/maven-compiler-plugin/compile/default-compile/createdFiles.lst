@@ -1,0 +1,15 @@
+JobThree/CompaniesCombiner$ReducerCombiner.class
+JobOne/JobUno$MapperUno.class
+JobThree/JobThreeDriver.class
+JobThree/CompaniesCombiner.class
+JobThree/JoinMR$ReducerJoin.class
+JobThree/JoinMR$MapperHistoricalStocks.class
+JobOne/JobUno$ReducerUno.class
+JobThree/MeanByName$ReducerMean.class
+JobThree/MeanByName$MapperMean.class
+JobThree/JoinMR$MapperHistoricalStockPrices.class
+JobOne/JobUno.class
+objects/Stock.class
+JobThree/JoinMR.class
+JobThree/MeanByName.class
+JobThree/CompaniesCombiner$MapperCombiner.class
