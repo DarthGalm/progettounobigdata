@@ -69,7 +69,7 @@ public class JoinMR {
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
             //delim ","
             //String[] cols = value.toString().split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)"); //trovata su Stack Overflow
-            String[] cols = value.toString().split(",");
+            String[] cols = value.toString().split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
             Text tickerSymbol = new Text();
             //Text historicalStockPricesData = new Text();
             Text historicalStocksData = new Text();
@@ -80,11 +80,17 @@ public class JoinMR {
                     System.out.println("ticker contiene apice: " + cols[Stock.ticker]);
                     return;
                 }
+
+                String companyName = cols[Stock.name];
                 //alcune hanno una virgola nel nome azienda, prima di Inc. ed elaboro quel caso
-                String secondPart = "";
-                secondPart = colsLength > 5 ? cols[Stock.secondName] : "";
+/*                if(colsLength > 5){
+                    for (int i = 3; i < cols.length -2; i++) {
+                        companyName += "," + cols[i];
+                    }
+                }*/
+
                 tickerSymbol.set(cols[Stock.ticker]);
-                historicalStocksData.set(String.format("%s,%s%s", "hs",cols[Stock.name], secondPart));
+                historicalStocksData.set(String.format("%s,%s", "hs",companyName));
                 //System.out.println("ticker contiene apice ma comunque è in context write: " + cols[Objects.Stock.ticker]);
                 context.write(tickerSymbol, historicalStocksData);
             } else {
@@ -105,6 +111,8 @@ public class JoinMR {
             double min2016 = 0;
             double min2017 = 0;
             double min2018 = 0;
+
+
             //Stringhe di supporto
             String delim = ",";
             //String ticker = key.toString(); usato all' inizio perche' dava problemi
@@ -191,6 +199,8 @@ public class JoinMR {
                     nameValue = cols[1];
                 }
             }
+
+
             //con min e max intendo il primo e l' ultimo, come per il job 1
             Double percentVariation2016 = (((max2016 - min2016) / min2016) * 100);
             Double percentVariation2017 = ((max2017 - min2017) / min2017) * 100;
@@ -198,13 +208,18 @@ public class JoinMR {
             percentVariation2016 = Double.isNaN(percentVariation2016) ? 0 : percentVariation2016;
             percentVariation2017 = Double.isNaN(percentVariation2017) ? 0 : percentVariation2017;
             percentVariation2018 = Double.isNaN(percentVariation2018) ? 0 : percentVariation2018;
-            String yearAndVariation2016 = String.format("%s:%d","2016",percentVariation2016.longValue());
-            String yearAndVariation2017 = String.format("%s:%d","2017",percentVariation2017.longValue());
-            String yearAndVariation2018 = String.format("%s:%d","2018",percentVariation2018.longValue());
-            yearAndVariationValue = String.format("%s;%s;%s", yearAndVariation2016,yearAndVariation2017,yearAndVariation2018);
 
-            String joinOutput = String.format("%s;%s",yearAndVariationValue, nameValue);
-            context.write(key, new Text(joinOutput));
+            boolean isOutputNull =  percentVariation2016 == 0 && percentVariation2017 == 0 && percentVariation2018 == 0;
+
+            if(!isOutputNull) {
+                String yearAndVariation2016 = String.format("%s:%d","2016",percentVariation2016.longValue());
+                String yearAndVariation2017 = String.format("%s:%d","2017",percentVariation2017.longValue());
+                String yearAndVariation2018 = String.format("%s:%d","2018",percentVariation2018.longValue());
+                yearAndVariationValue = String.format("%s;%s;%s", yearAndVariation2016,yearAndVariation2017,yearAndVariation2018);
+
+                String joinOutput = String.format("%s;%s", yearAndVariationValue, nameValue);
+                context.write(key, new Text(joinOutput));
+            }
         }
     }
 }
