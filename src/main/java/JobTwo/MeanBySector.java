@@ -17,6 +17,7 @@ class JobTwoResult
     private double closeSum;
     private double percentVariationSum;
     private int avgCounter;
+    private int percentAvgCounter;
 
     private long volumeAvg;
     private Double closeAvg;
@@ -27,7 +28,8 @@ class JobTwoResult
             long volumeSum,
             double percentVariationSum,
             double closeSum,
-            int avgCounter
+            int avgCounter,
+            int percentAvgCounter
     )
     {
         this.year = year;
@@ -35,6 +37,7 @@ class JobTwoResult
         this.closeSum = closeSum;
         this.percentVariationSum = percentVariationSum;
         this.avgCounter = avgCounter;
+        this.percentAvgCounter = percentAvgCounter;
     }
 
     public String Year() {return year;}
@@ -46,7 +49,8 @@ class JobTwoResult
     public void updateVolumeSum(long volumeSum) { this.volumeSum += volumeSum; }
     public void updatePercentVariationSum(double percentVariationSum) { this.percentVariationSum += percentVariationSum; }
     public void updateCloseSum(double closeSum) { this.closeSum += closeSum; }
-    public void updateAvgCounter() { this.avgCounter++;}
+    public void updateAvgCounter(int counter) { this.avgCounter += counter;}
+    public void updatePercentAvgCounter() { this.percentAvgCounter ++;}
 
     public void calculateVolumeAvg(){
         volumeAvg = volumeSum / avgCounter;
@@ -55,7 +59,7 @@ class JobTwoResult
         closeAvg = closeSum / avgCounter;
     }
     public void calculatePercentVariationAvg(){
-        percentVariationAvg = percentVariationSum / avgCounter;
+        percentVariationAvg = percentVariationSum / percentAvgCounter;
     }
 
 }
@@ -102,18 +106,20 @@ public class MeanBySector {
                     long volume = Long.parseLong(stockValues[1]);
                     double percentVariation = Double.parseDouble(stockValues[2]);
                     double close = Double.parseDouble(stockValues[3]);
+                    int counter = Integer.parseInt(stockValues[4]);
 
-                    if(results[i] == null && volume != 0 && percentVariation != 0.000 && close != 0.000)
+                    if(results[i] == null && volume != 0 && percentVariation != 0.000 && close != 0.000 && counter != 0)
                     {
-                        results[i] = new JobTwoResult(year, volume, percentVariation, close, 1);
+                        results[i] = new JobTwoResult(year, volume, percentVariation, close, counter, 1);
                     }
-                    else if(volume != 0 && percentVariation != 0.000 && close != 0.000)
+                    else if(volume != 0 && percentVariation != 0.000 && close != 0.000 && counter != 0)
                     {
                         JobTwoResult result = results[i];
                         result.updateVolumeSum(volume);
                         result.updatePercentVariationSum(percentVariation);
                         result.updateCloseSum(close);
-                        result.updateAvgCounter();
+                        result.updateAvgCounter(counter);
+                        result.updatePercentAvgCounter();
                     }
                 }
             }
