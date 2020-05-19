@@ -24,6 +24,7 @@ public class CompaniesCombiner {
                 companyName.set((cols[0]));
                 //arrotondamento dei numeri all' intero più vicino per far uscire i dati
                 //la rimozione della virgola è perchè in Italia i decimali si scrivono con la virgola
+
                 /*long price2016 = Double.valueOf(cols[1].substring(5).replaceAll(",", ".")).longValue();
                 long price2017 = Double.valueOf(cols[2].substring(5).replaceAll(",", ".")).longValue();
                 long price2018 = Double.valueOf(cols[3].substring(5).replaceAll(",", ".")).longValue();*/

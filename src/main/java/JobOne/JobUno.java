@@ -44,7 +44,7 @@ public class JobUno {
                 return;
             }
         }
-
+        //noi vogliamo solo dal 2008 al 2018
         private boolean isInDesiredRange(String date) {
             String referenceStartDate = "2008-01-01";
             SimpleDateFormat format = new SimpleDateFormat(
@@ -59,12 +59,12 @@ public class JobUno {
                 System.out.println("errore parsing data");
                 e.printStackTrace();
             }
-            return dateToCompare.compareTo(referenceDate) > 0 ? true : false;
+            return dateToCompare.compareTo(referenceDate) > 0;
         }
     }
 
     public static class ReducerUno extends Reducer<Text, Text, Text, Text> {
-
+        //per ordinamento
         private TreeMap<Double, Text> sortMap = new TreeMap<Double, Text>(Collections.<Double>reverseOrder());
 
         @Override
