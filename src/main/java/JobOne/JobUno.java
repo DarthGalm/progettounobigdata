@@ -18,9 +18,29 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.StringUtils;
 
-import Objects.Stock;
 
 public class JobUno {
+
+    static class Stock {
+        //common
+        public static int ticker = 0;
+
+        //historical stock prices
+        public int open = 1;
+        public static int close = 2;
+        public int adj_close = 3;
+        public int lowThe = 4;
+        public int highThe = 5;
+        public static int volume = 6;
+        public static int date = 7;
+
+        //historical stocks
+        public int exchange = 1;
+        public int name = 2;
+        public int secondName = 3;
+        public int sector = 3;
+        public int industry = 4;
+    }
 
     public static class MapperUno extends Mapper<LongWritable,Text,Text,Text> {
 
@@ -70,9 +90,9 @@ public class JobUno {
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
-            double max = 0, min = 0;
-            double first = 0, last = 0;
-            double count = 0;
+            double maxPrice = 0, minPrice = 0;
+            double firstPrice = 0, lastPrice = 0;
+            double countRecords = 0;
             double sum = 0;
             double avg = 0;
             double percentVariation = 0;
@@ -97,41 +117,41 @@ public class JobUno {
                     e.printStackTrace();
                 }
                 //se sono uguali a 0 e' la prima passata
-                if (first == 0 && last == 0) {
-                    first = price;
-                    last = price;
-                    max = price;
-                    min = price;
+                if (firstPrice == 0 && lastPrice == 0) {
+                    firstPrice = price;
+                    lastPrice = price;
+                    maxPrice = price;
+                    minPrice = price;
                     sum = volume;
-                    count = 1;
+                    countRecords = 1;
                     minCheckedDate = currentDate;
                     maxCheckedDate = currentDate;
                 } else { //non e' la prima passata
 
-                    if (price > max) {
-                        max = price;
-                    } else if (price < min) {
-                        min = price;
+                    if (price > maxPrice) {
+                        maxPrice = price;
+                    } else if (price < minPrice) {
+                        minPrice = price;
                     }
 
                     if (currentDate.compareTo(maxCheckedDate) > 0) {
-                        last = price;
+                        lastPrice = price;
                         maxCheckedDate = currentDate;
                     } else if (currentDate.compareTo(minCheckedDate) < 0) {
-                        first = price;
+                        firstPrice = price;
                         minCheckedDate = currentDate;
                     }
 
                     sum += volume;
-                    count++;
+                    countRecords++;
                 }
             }
-            avg = sum / count;
-            percentVariation = ((last - first) / first) * 100;
+            avg = sum / countRecords;
+            percentVariation = ((lastPrice - firstPrice) / firstPrice) * 100;
 
             String ticker = key.toString();
             String percentVar = String.format("percent variation: %.2f ", percentVariation);
-            String minAndMax = String.format("min: %.2f max: %.2f ", min, max);
+            String minAndMax = String.format("min: %.2f max: %.2f ", minPrice, maxPrice);
             String avgVolume = String.format("avg: %.2f", avg);
 
             String textToWrite = ticker + ";" + percentVar + minAndMax + avgVolume;
