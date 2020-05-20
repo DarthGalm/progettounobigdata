@@ -73,15 +73,16 @@ class JobTwoStock
     public void setCloseSum(double closeSum) { this.closeSum = closeSum; }
     public void setAvgCounter(int avgCounter) { this.avgCounter = avgCounter;}
 
-    public void calculatePercentVariation() {
+   public void calculatePercentVariation() {
         percentVariation = (((lastClose - firstClose) / firstClose) * 100);
     }
+    /*
     public void calculateVolumeAvg(){
         volumeAvg = volumeSum / avgCounter;
     }
     public void calculateCloseAvg(){
         closeAvg = closeSum / avgCounter;
-    }
+    }*/
 
 }
 
@@ -235,11 +236,13 @@ public class JoinMR {
                 if(o != null) {
                     isOutputNull = false;
                     o.calculatePercentVariation();
+                    /*
                     o.calculateCloseAvg();
                     o.calculateVolumeAvg();
-                    stockOutput[i] = String.format("%s:%d:%.3f:%.3f",o.Year(),o.VolumeAvg(),o.PercentVariation(),o.CloseAvg());
+                    */
+                    stockOutput[i] = String.format("%s:%d:%.3f:%.3f:%d",o.Year(),o.VolumeSum(),o.PercentVariation(),o.CloseSum(),o.AvgCounter());
                 }else{
-                    stockOutput[i] = String.format("%s:%d:%.3f:%.3f",i+2008,0,0.0,0.0);
+                    stockOutput[i] = String.format("%s:%d:%.3f:%.3f:%d",i+2008,0,0.0,0.0,0);
                 }
 
             }
