@@ -20,9 +20,7 @@ GROUP BY grouped_by_ticker.name, grouped_by_ticker.year
 ) grouped_by_company
 GROUP BY company
 ) result
-WHERE collect_list(company) > 1
-GROUP BY trend;
-
+GROUP BY trend
+HAVING count(*) > 1
 LIMIT 10;
-
 
