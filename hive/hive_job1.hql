@@ -8,4 +8,5 @@ SELECT ticker, MAX(close) as max_close, MIN(close) as min_close, AVG(volume) as 
 FROM historical_stock_prices 
 WHERE stockdate >= '2008-01-01' AND stockdate <= '2019-01-01' 
 GROUP BY ticker
-ORDER BY percent_var DESC;
+ORDER BY percent_var DESC
+LIMIT 10;
