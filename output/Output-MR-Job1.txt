@@ -1,0 +1,10 @@
+EAF	percent variation: 267757,13 min: 0,00 max: 22,37 avg: 1245139,04
+ORGS	percent variation: 217415,93 min: 0,00 max: 19,80 avg: 8570,96
+PUB	percent variation: 179900,00 min: 0,01 max: 135,00 avg: 34449,40
+RMP	percent variation: 121081,60 min: 0,03 max: 78,55 avg: 120487,05
+CTZ	percent variation: 120300,00 min: 0,00 max: 26,73 avg: 52050,27
+CCD	percent variation: 111250,00 min: 0,01 max: 25,55 avg: 105416,89
+SAB	percent variation: 110428,77 min: 1,40 max: 38800,00 avg: 1695378,02
+KE	percent variation: 99400,00 min: 0,01 max: 22,20 avg: 73249,85
+LN	percent variation: 96700,00 min: 0,01 max: 49,63 avg: 394344,93
+GHG	percent variation: 64850,00 min: 0,00 max: 24,31 avg: 607659,29
