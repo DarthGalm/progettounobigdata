@@ -16,7 +16,7 @@ GROUP BY hsp.ticker, sector, YEAR(hsp.stockdate)
 ) grouped_by_ticker
 GROUP BY grouped_by_ticker.sector, grouped_by_ticker.year
 ) result
-GROUP BY sector;
+GROUP BY sector
 
 LIMIT 10;
 
