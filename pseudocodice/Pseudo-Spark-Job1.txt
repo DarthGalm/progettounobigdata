@@ -1,0 +1,64 @@
+main(){
+    spark = new SparkContext(config);
+    stockPrices = spark.textFile(“historical_stock_prices.csv”)
+
+    mappedStockPrices = stockPrices
+    .map(row =>{
+        skipHeader())
+        return (ticker, (close,volume,date)) //(key, (values))
+    })
+    .filter(row => row.date.isAfter(2008) && row.date.isBefore(2018))
+
+    //start/endClose = the first/last close in that year, needed to calculate the percentVariation later
+    //start/endDate = date date of the respective start/endClose, needed to update start/endClose
+    //min/maxClose = min/maxClose in that year
+    //volumeSum = sum of the volumes in that year, needed for the mean later
+    //volumeCounter = how many volumes got summed in that year, needed for the mean later
+    
+    initialAccumulator = new (startClose,endClose,startDate,endDate,minClose,maxClose,volumeSum,volumeCounter)
+
+    result = mappedStockPrices
+    //returns an rdd aggregated by ticker with the structure: (ticker,(startClose,endClose,startDate,endDate,minClose,maxClose,volumeSum,volumeCounter))
+    .aggregateByKey(initialAccumulator)(seqOp,compOp) 
+    .map(row => {
+        return(
+            ticker,
+            getPercentVariation(startClose,endClose)
+            minClose,
+            maxClose,
+            getAverageVolume(volumeSum,volumeCounter)
+        )
+    })
+
+    println(result.takeFirstTenElements)
+}
+
+//scans the rdd and accumulates by key (returns accumulator)
+//this work can be split to multiple partitions working indipendently in a fraction of the rdd
+seqOP(accumulator, row){
+    return(
+        getStartClose(),
+        getEndClose(),
+        getStartDate(),
+        getEndDate(),
+        getMinClos(),
+        getMaxClose(),
+        getVolumeSum(),
+        getVolumeCounter()
+    )
+}
+
+//after the seqOP phase is completed, the partitions combine their results in order to return the complete result
+//returns the combination of accumulator1 and accumulator2
+compOp(accumulator1, accumulator2){
+    return(
+        getStartClose(),
+        getEndClose(),
+        getStartDate(),
+        getEndDate(),
+        getMinClos(),
+        getMaxClose(),
+        getVolumeSum(),
+        getVolumeCounter()
+    )
+}

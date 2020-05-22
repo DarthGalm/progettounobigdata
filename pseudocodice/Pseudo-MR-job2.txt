@@ -1,0 +1,46 @@
+main(){
+    stockPrices = textFile(“historical_stock_prices.csv”)
+    stocks = textFile("historical_stocks.csv)
+
+    mappedStockPrices = stockPrices
+    .map(row =>{
+        skipHeader()
+        if(date.isAfter(2008) && date.isBefore(2018)){
+            return (ticker, (close,date,volume)) //(key, (values))
+        }
+    })
+
+    mappedStocks = stocks.map(row =>{
+        skipHeader()
+        return(ticker,sector)
+    })
+
+    //reduce function that joins the two datasets while calculating certain values in the process
+    //returns a dataset grouped by ticker with the structure: (ticker, ([(year, volumeSum, percentVariation, closeSum, avgCounter), sector)] //from 2008 to 2018) 
+    //volumeSum = sum of the volumes in that year, needed for the mean later
+    //closeSum = sum of the closing prices in that year, needed for the mean later
+    //avgCounter = how many volumes/closing prices got summed in that year, needed for the mean later
+    //I can't calculate the averages in this step because I need to combine every ticker into their sector, and the averages of averages is incorrect
+
+    joinedData = joinReduce(mappedStockPrices,mappedStocks){
+        where(mappedStockPrices.ticker == mappedStocks){
+            accumulate by ticker ([(getYear(), getVolumeSum(), getPercentVariation(), getCloseSum(), getAvgCounter())] //from 2008 to 2018 , sector)
+        }
+    }
+
+    //returns a dataset with the structure (sector, trendsFrom2008to2018)
+    result = joinedData
+    .map(row => (sector, [(year, volumeSum, percentVariation, closeSum, avgCounter), sector)] //from 2008 to 2018))
+    //combines the trend of each ticker into their correspondent sector
+    //so the trend of the sector is the combination of the trends of its tickers
+     //returns a dataset grouped by sector with the structure: (sector, [(year, volumeSum, percentVariation, closeSum, avgCounter)] //from 2008 to 2018) 
+    .reduce(){
+        accumulate by sector ([(getYear(), getVolumeSum(), getPercentVariation(), getCloseSum(), getAvgCounter())] //from 2008 to 2018)
+    }
+    //calculate the averages
+    .map(row => {
+       return [(year, getAverageVolume(volumeSum, avgCounter), percentVariation, getAverageClose(closeSum, avgCounter))] //trends from 2008 to 2018
+    })
+
+    println(result.takeFirstTenElements)
+}

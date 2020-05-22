@@ -1,0 +1,32 @@
+class MapperCombiner {
+
+	function map(key, values, context) {
+
+		#this only swaps previous reducer emitted key and value, after rounding them, this ensures the trend is the key, and the values are company names 
+		cols = value.split(";")
+		price2016=roundedValueFor[cols[1])
+		#same for 2017 and 2018, with cols[2] and [3]
+		companyName = cols[0]
+		emit(companyName, price2016 + price2017 + price2018)
+	}
+}
+#this simply pretty prints the output and filters the trends with only one company
+class ReducerCombiner {
+	function reduce(key,values,context) {
+		#declare and init string to append all companies name and counter
+		companiesName, count
+		for(val in values) {
+			companiesName.append(val.toString())
+			count++
+		}
+		#checks if there are values for all 3 years
+		cols = key.split()
+		if(cols.length ==3) {
+			#builds trend as string
+			stringTrend = String.format(2016:%s%%,2017:%s%%, 2018:%s%%, valueFor2016, etc...)
+			#build output
+			emit(companiesName, stringTrend)
+		} else {
+			print(#errore)
+		}
+}

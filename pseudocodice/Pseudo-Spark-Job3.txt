@@ -1,0 +1,66 @@
+main(){
+    spark = new SparkContext(config);
+    stockPrices = spark.textFile(“historical_stock_prices.csv”)
+    stocks = spark.textFile("historical_stocks.csv)
+
+    mappedStockPrices = stockPrices
+    .map(row =>{
+        skipHeader()
+        return (ticker, (ticker,close,date)) //(key, (values))
+    })
+    .filter(row => row.date.isAfter(2016) && row.date.isBefore(2018))
+
+    mappedStocks = stocks.map(row =>{
+        skipHeader()
+        return(ticker,companyName)
+    })
+
+    //returns a dataset with the structure: (ticker, ((ticker,close,date), companyName))
+    joinedRdd = mappedStockPrices.join(mappedStocks)
+
+    mappedRdd = joinedRdd.map(row = > return (companyName,(ticker, close, date))))
+
+    //start/endClose = the first/last close in that year, needed to calculate the percentVariation later
+    //start/endDate = date date of the respective start/endClose, needed to update start/endClose
+    //for each key ticker there's its 2016-2018 trends
+    //it's a map because each company can have multiple tickers
+    //we will combine the trends at a later moment
+    initialAccumulator = new Map(ticker, Trends[
+        new (year, startClose, endClose, startDate, endDate), //2016 trend
+        new (year, startClose, endClose, startDate, endDate), //2017 trend
+        new (year, startClose, endClose, startDate, endDate), //2018 trend
+        ])
+    
+    result = mappedRdd
+    //returns an rdd aggregated by companyName with the structure: (companyName, Map(ticker,Trends[2016trend, 2017trend, 2018trend]))
+    .aggregateByKey(initialAccumulator)(seqOp,compOP) 
+    //mapOfTrendsPerTicker = Map(ticker,Trends[2016trend, 2017trend, 2018trend])
+    .map(mapOfTrendsPerTicker => {
+        trendResult = [(2016, percentVariation), (2017, percentVariation), (2018, percentVariation)]
+
+        //if the company had multiple tickers we need to combine the trends of each ticker into a single list of 2016-2018 trends
+        forEachKeyIn(mapOfTrendsPerTicker){
+            updatePercentVariationOfItsRespectiveYear
+        }
+    })
+
+    println(result.takeFirstTenElements)
+}
+
+//scans the rdd and accumulates by key (returns accumulator)
+//this work can be split to multiple partitions working indipendently in a fraction of the rdd
+seqOP(accumulator, row){
+    updatedTrends = update(GetMapValueByKey(row.ticker))
+
+    return(
+        updatedTrends
+    )
+}
+
+//after the seqOP phase is completed, the partitions combine their results in order to return the complete result
+//returns the combination of accumulator1 and accumulator2
+compOp(accumulator1, accumulator2){
+    return(
+        combineAcc1TrendsWithAcc2Trends
+    )
+}

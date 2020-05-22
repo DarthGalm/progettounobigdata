@@ -1,0 +1,71 @@
+class Stock #simple support class to help getting 
+            #the elements of split row,   
+            #without having to remember the exact position
+int ticker, open, close, volume, date, name #integer, the split() array indexes
+
+class JoinMR {
+	function bool filterForDateAfter2008(date) {
+	referenceDate = "01/01/2008"
+	return date > referenceDate #it's unnecessary to check for date after 2018 as the dataset doesn't have any
+	}
+
+	class MapperHistoricalStockPrices {
+#this emits in the MR context tickers as key and closing price and date as values 
+		function map (key, value, context) {
+			cols = value.split(",") # split of every row to obtain all values
+			#checks for length and ticker, otherwise prints error
+			filterForDateAfter2008(cols.date) #only 2008 onwards
+			emit(tickerAsKey, "hsp" + closepriceDateAsValue) 
+	    }										
+	}
+#this emits in the MR context ticker as key and company name as value
+	class MapperHistoricalStocks {
+		function map (key, value, context) {
+			cols = value.split(",") #split of every row
+		 #the following condition filters for corrupted rows and first row
+			if(cols.length>=5 & not (cols.contains("^" or "ticker")) {
+	 	 #splitting for "," splits name internally, if more than 5 splits, add the second part of the name	
+				if(cols.length>5) 
+					addSecondPartToCompanyName() 
+			emits(tickerAsKey, "hs" + companyNameAsValue)
+		}
+	}
+	class ReducerJoin { #this acts as a join between the datasets
+		function reduce (key, values, context)
+			#init support variables for min and max for every year
+			declare and init maxPrice2016, minPrice2016, maxPrice2017, minPrice2017, maxPrice2018, minPrice2018
+			declare and init maxDate2016, minDate2016, ..., minDate2018
+			
+			for(val in values) {
+				cols = val.split(",")
+				if(val[0].equals("hsp")){ #I'm elaborating historical stock prices data
+					year = getYearOf(val.date) #parses date and gets only the year
+					switch(year)
+						case 2016:
+							if((min2016 && max2016) == 0) #prima passata
+							#initialize values for minimum and maximum date and price
+								initMinAndMaxValues2016()
+							else { #seconda passata
+								if(cols.date < minDate2016) {
+									minPrice2016 = cols.price
+									minDate2016 = cols.date}
+								else if(cols.date > maxDate2016){
+									maxPrice2016 = cols.price
+									maxDate2016 = cols.date }
+							}
+						break;
+						case 2017: #does the same as before, only for 2017
+						case 2018: #does the same as before, only for 2018
+				}
+				else if(val[0].equals("hs")){#I'm elaborating historical stocks
+					String companyName = cols[1]	
+			}
+			percentVariationFor2016 = ((max2016-min2016)/min2016) * 100
+			percentVariationFor2017 = ((max2017-min2017)/min2017) * 100
+			percentVariationFor2018 = ((max2018-min2018)/min2018) * 100
+			outputString = String.format("%s;%s;%s;%s", percentVariationFor2016, percentVariationFor2017, 							percentVariationFor2018, companyName)
+			emit(key, outputString) 
+			#output for reducer is ticker as key, and corresponding percent variation for each requested year, and company name
+	}
+}
+

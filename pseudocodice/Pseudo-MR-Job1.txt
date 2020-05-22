@@ -1,0 +1,73 @@
+class Stock #simple support class to help getting 
+            #the elements of split row,   
+            #without having to remember the exact position
+int ticker, open, close, volume, date #integer, the split() array indexes
+
+class Mapper {
+
+	function bool filterForDateAfter2008(date) {
+	referenceDate = "01/01/2008"
+	return date > referenceDate #it's unnecessary to check for date after 2018 as the dataset doesn't have any
+	}
+
+
+	function map(key, value, context) {
+	cols = value.split(",") # split of every row to obtain all values
+	#checks for length and "ticker", otherwise prints error
+	filterForDateAfter2008(cols.date) #only 2008 onwards
+	emit(tickerAsKey, closepriceDateVolumeAsValue) 
+#this last line writes in MR context ticker as Key and close price, date and volume as values for the next reduce phase
+	}
+}
+
+class Reducer { #takes the input and for every key does the following operations
+	function reduce(key, value, context) {
+		TreeMap<Double, Text> sortMap = new TreeMap<Double, Text>(Collections.<Double>reverseOrder()); # support collection to put values in descending order
+		declare and initialize maxPrice, minPrice, firstPrice, 
+		lastPrice, maxDate, lastDate, count, sum, avg, percentVariation = 0
+		for (val in values){
+			cols = val.split(",")
+			declare and initialize price, currentDate, volume = valuesOf(val)
+			if(firstPrice == 0 && lastPrice == 0) #first pass, initialization
+				initialize maxPrice, minPrice, firstPrice, lastPrice, count, sum, avg, percentVariation = valuesOf(val)
+			else { # not the first pass
+				if(price > max) 
+					max = val.price 
+				else if (price < min) 
+					min = val.price
+				if(val.date > maxDate) {
+					lastPrice = val.price
+					maxDate = val.date
+				} else if (val.date < minDate) {
+					firstPrice = val.price
+					minDate = val.date
+				}
+			}
+			sum += val.volume;
+            count++;
+		}
+		avg = sum/count
+		percentVar = ((lastPrice - firstPrice) / firstPrice) * 100;
+
+		sortMap.put(key=percentVar, value=String(ticker + percentVar + minAndMax + avgVolume)) #the values are written as string (this is a concise writing)
+	}
+#now we have an unsorted map that has the desired sorting discriminant as key and the rest of the data as value, we just have to print the values. I thought about doing it in a cleanup method instead of another map-reduce phase.
+
+	function cleanup() { #takes the values in the map to print them as they're ordered
+		for(val in sortMap.values())
+			emit(val.key, val.values) #see above 
+	}
+}
+
+function main(args) {
+	get input as path[0]
+	get output as path[1]
+	init conf, mapper and reducer
+	waitForCompletion()
+	return
+}
+
+
+
+
+}

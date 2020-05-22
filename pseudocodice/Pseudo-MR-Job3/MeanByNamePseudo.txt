@@ -1,0 +1,43 @@
+class MeanByName {
+
+class MapperMean {
+	#mapper simply removes the ticker key and substitutes it with company name for next reducer
+	function map(key, value, context){
+		cols = value.split(";")#different from before, comes from previous reducer
+		checkForErrorInCols() #checks if cols.length != 5, there's an error
+		emit(companyNameAsKey, pricesForEveryYearAsValue)
+	}		
+}
+
+class ReducerMean {
+	#reducer gets all companies and does the mean
+	function reducer(key, value, context) {
+		declares and inits sum2016, sum2017, sum2018 and recordCount
+		for(val in values) {
+			#parses and assigns values for years to variables
+			sum2016 += val.percentVar2016
+			sum2017 += val.percentVar2017
+			sum2018 += val.percentVar2018
+			recordCount++
+		}
+		if(recordCount!=0) {
+			#declares and init avg2016,avg2017,avg2018 as sum/count for each year
+			avg2016 = sum2016/recordCount
+			#same for 2017 and 2018 }
+		else
+			print(#no values error)
+		if((avg2016, avg2017, avg2018)!=0) {
+			#forms string with year and average of percent var.
+			string2016 = ("2016" + avg2016)
+			#same for 2017 and 2018
+			outputvalue = String.format("%s;%s;%s", string2016, string2017, string2018)
+			emit(key, outputValue) 
+		} else {
+		print(#error all zeroes)
+		}
+	}
+}
+			
+
+}
+			
