@@ -23,11 +23,6 @@ public class CompaniesCombiner {
             if (cols.length == 4) {
                 companyName.set((cols[0]));
                 //arrotondamento dei numeri all' intero più vicino per far uscire i dati
-                //la rimozione della virgola è perchè in Italia i decimali si scrivono con la virgola
-
-                /*long price2016 = Double.valueOf(cols[1].substring(5).replaceAll(",", ".")).longValue();
-                long price2017 = Double.valueOf(cols[2].substring(5).replaceAll(",", ".")).longValue();
-                long price2018 = Double.valueOf(cols[3].substring(5).replaceAll(",", ".")).longValue();*/
 
                 long price2016 = Long.parseLong(cols[1].substring(5));
                 long price2017 = Long.parseLong(cols[2].substring(5));
@@ -50,40 +45,23 @@ public class CompaniesCombiner {
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
-            /*if(!values.iterator().hasNext()) { //non ha senso stampare trend di una sola azienda
-                return;
-            }*/
-            //non ha senso stampare trend di una sola azienda
-/*            long size = values.spliterator().getExactSizeIfKnown();
-
-            if(size <= 1) {
-                System.out.println("TEST : RIGA ELIMINATA : " + key.toString());
-                return;
-            } */
-
             String delim = ";";
             String result = "{";
 
             int count = 0;
-            String valueTest = "";
 
             for (Text val : values) {
                 result = result.concat(val.toString() + ", ");
-                valueTest = val.toString();
                 count++;
             }
-           if(count>=2) {
-                //System.out.println(valueTest);
-            } else {
+           if(count < 2) {
                return;
-           }
+            }
 
-            result = result.substring(0,result.length()-2); //cut degli ultimi 2
+            result = result.substring(0,result.length()-2); //cut degli ultimi 2 caratteri ovvero virgola e whitespace
             result = result.concat("}: ");
 
             String[] cols = StringUtils.getStrings(key.toString(), delim);
-
-            //System.out.println("TEST " + cols[0] + " - " + cols[1] + " - " + cols[2] + " - KEY " + key.toString() );
 
             if(cols.length == 3) {
                 String yearAndVariation2016 = String.format("2016:%s%%", cols[0]);
@@ -91,8 +69,6 @@ public class CompaniesCombiner {
                 String yearAndVariation2018 = String.format("2018:%s%%", cols[2]);
 
                 String yearAndVariationValue = String.format("%s, %s, %s", yearAndVariation2016, yearAndVariation2017, yearAndVariation2018);
-                //result.concat(yearAndVariationValue);
-                //System.out.println(result);
                 context.write(new Text(result.replaceAll("\"", "")), new Text(yearAndVariationValue));
             } else {
                 System.out.println("errore: controllare riga con prezzi " + key.toString());
