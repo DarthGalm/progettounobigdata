@@ -45,39 +45,43 @@ function main() {
 create Spark context and conf, takes input files
 
 #maps the input historical stocks to a tuple with only the ticker and the sector
+#regex found on StackOverflow at https://stackoverflow.com/questions/34257547/split-string-on-comma-and-ignore-comma-in-double-quotes
 JavaRDD<String[]> splitStocks = map(row -> row.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)"));
+#row[0] and row[3] are first and fourth element of a row in the csv (ticker and sector)
 JavaPairRDD<String, String> tickerAndCompanySectorTuple = splitStocks.filterOutRowWith("ticker").mapToPair(row[0],row[3])
 
 #maps the input historical stock prices to a tuple with ticker, and an array with closing price, volume and date
 JavaRDD<String[]> splitStockPrices = historicalStockPrices.map(row -> row.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)"));
 JavaPairRDD<String, String[]> stockPricesTuple = splitStockPrices.filterOutRowWithDateBefore(01/01/2008).mapToPair(row[0], String[][row[2],row[6],row[7]])
 
+#this joins on the key which in the first element of the tuples of the JavaPairRDDs
 JavaPairRDD<String, Tuple2<String, String[]>> joinDataset = tickerAndCompanySectorTuple.join(stockPricesTuple);
 
-#groups by ticker, sector and year as key, object Trend as value to store data
+#groups by ticker, sector and year as key, object Trend as value to store data such as prices and dates to aggregate later
 JavaPairRDD<Tuple3<String, String, String>, YearlyTrend> joinDatasetGroupedByTickerSectorYear = joinDataset.mapToPair(
 			#ticker sector and year taken by accessing the tuple like this: line._1(), line._2()._1() scala-like
-                line -> { new Tuple(ticker, sector, year), new YearlyTrend(#initializes with values taken from records) }
+                line -> { new Tuple(ticker, sector, year), new YearlyTrend(#initialized with values taken from records) }
 
+#this is to aggregate all the values sharing the same ticker, sector and year (but different dates of course) into one
 JavaPairRDD<Tuple3<String, String, String>, YearlyTrend> reducedDatasetByTickerYearAndSector = joinDatasetGroupedByTickerSectorYear.reduceByKey(
 (firstTrend, secondTrend) -> #this aggregates the second in the first, one by one, first is the accumulator, with a lambda function
 
 aggregatedPrice = firstTrend.pricesSum + secondTrend.pricesSum;
 aggregatedVolume = firstTrend.volumeSum + secondTrend.volumeSum;
 aggregatedCount = firstTrend.count + secondTrend.count;
-
-		if(firstInitialDate.compareTo(secondInitialDate) > 0) { //first is bigger than second one
+		//initial date of first trend is later than second's one
+		if(firstInitialDate.compareTo(secondInitialDate) > 0) { 
                     chosenFirstDate = secondTrend.firstDate;
                     chosenFirstPrice = secondTrend.firstClosePrice;
-                } else {  //la seconda è più in là della prima, o sono uguali
+                } else {  //date of second trend is later than first's
                     chosenFirstDate = firstTrend.firstDate;
                     chosenFirstPrice = firstTrend.firstClosePrice;
                 }
-
-                if(firstFinalDate.compareTo(secondFinalDate) > 0) { //la prima è più in là della seconda
+		//final date of first trend is later than second's one
+                if(firstFinalDate.compareTo(secondFinalDate) > 0) { 
                     chosenLastDate = firstTrend.lastDate;
                     chosenLastPrice = firstTrend.lastClosePrice;
-                } else {
+                } else { //date of second trend is later than first's one
                     chosenLastDate = secondTrend.lastDate;
                     chosenLastPrice = secondTrend.lastClosePrice;
                 }
@@ -87,7 +91,7 @@ return new YearlyTrend(year, chosenFirstPrice, chosenLastPrice, chosenFirstDate,
 
 #now I have to group by sector and year, aggregating by ticker. for the average, I sum every value but not compute the average now, as explained in:
 #https://math.stackexchange.com/questions/115091/is-the-average-of-the-averages-equal-to-the-average-of-all-the-numbers-originall
-#I simply return all the values of yearlyTend to use them later on. The Percent Variation is calculated now as it works differently from an average.
+#I simply return all the values of yearlyTend to use them later on. The Percent Variation is calculated now as it works differently from an average of values.
 
 #first I have to map because the reduceByKey bounds the output to the same input type
 JavaPairRDD<Tuple2<String, String>, Trend> newComputationByYearAndSector = reducedDatasetByTickerYearAndSector.mapToPair(line ->
@@ -102,8 +106,10 @@ JavaPairRDD<Tuple2<String, String>, Trend> finalReducedByYearAndSector = newComp
 		Double aggregatedVolumeForMeans = firstTrend.volumeMean + secondTrend.volumeMean;
                 Double aggregatedPriceForMeans = firstTrend.pricesMean + secondTrend.pricesMean;
                 Double aggregatedPercentVariation = firstTrend.percentVarMean + secondTrend.percentVarMean;
-                Integer countTotalForPriceAndVolume = firstTrend.countForPriceAndVolume + secondTrend.countForPriceAndVolume; #a sum of sums
-                Integer countTotalForPercentVar = firstTrend.countForPercentVar + secondTrend.countForPercentVar; #a sum of ones
+		#a sum of sums
+                Integer countTotalForPriceAndVolume = firstTrend.countForPriceAndVolume + secondTrend.countForPriceAndVolume;
+		#a sum of ones
+                Integer countTotalForPercentVar = firstTrend.countForPercentVar + secondTrend.countForPercentVar; 
 
                 return new Trend(aggregatedPriceForMeans, aggregatedVolumeForMeans, aggregatedPercentVariation, countTotalForPriceAndVolume, countTotalForPercentVar); })
 
