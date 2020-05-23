@@ -1,3 +1,7 @@
+#this is third and final class for job 3
+
+class  CompaniesCombiner {
+
 class MapperCombiner {
 
 	function map(key, values, context) {
@@ -7,7 +11,7 @@ class MapperCombiner {
 		price2016=roundedValueFor[cols[1])
 		#same for 2017 and 2018, with cols[2] and [3]
 		companyName = cols[0]
-		emit(companyName, price2016 + price2017 + price2018)
+		emit(price2016 + price2017 + price2018, companyName)
 	}
 }
 #this simply pretty prints the output and filters the trends with only one company
@@ -15,13 +19,16 @@ class ReducerCombiner {
 	function reduce(key,values,context) {
 		#declare and init string to append all companies name and counter
 		companiesName, count
-		for(val in values) {
+		for(val in values) { #values are all the companies that share a trend
 			companiesName.append(val.toString())
 			count++
 		}
-		#checks if there are values for all 3 years
+		if(count < 2) #this filters uncoupled companies
+			return;
+			
 		cols = key.split()
-		if(cols.length ==3) {
+		#check if there are values for all 3 years
+		if(cols.length == 3) {
 			#builds trend as string
 			stringTrend = String.format(2016:%s%%,2017:%s%%, 2018:%s%%, valueFor2016, etc...)
 			#build output
@@ -29,4 +36,6 @@ class ReducerCombiner {
 		} else {
 			print(#errore)
 		}
+}
+
 }
