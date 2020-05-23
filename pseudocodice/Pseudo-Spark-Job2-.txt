@@ -107,19 +107,35 @@ JavaPairRDD<Tuple2<String, String>, Trend> finalReducedByYearAndSector = newComp
 
                 return new Trend(aggregatedPriceForMeans, aggregatedVolumeForMeans, aggregatedPercentVariation, countTotalForPriceAndVolume, countTotalForPercentVar); })
 
-#final calculations for averages and printing to file
-JavaRDD<String> finalResultAsString = finalReducedByYearAndSector.map(
-                line -> {
+#final calculations for averages and printing to terminal
+List<Tuple2<Tuple2<String, String>, Trend>> finalResultAsRDDString = finalReducedByYearAndSector.collect();
+
+Map outputMap = new()
+
+for(line in finalResultAsRDDString) { #this iterates over all the previous results, after collect() transforming an RDD in a List
                     Trend trendToElaborate = line._2();
                     Double finalVolumeMeans = trendToElaborate.volumeMean / trendToElaborate.countForPriceAndVolume;
                     Double finalPricesMeans = trendToElaborate.pricesMean / trendToElaborate.countForPriceAndVolume;
                     Double finalPercentVariation = trendToElaborate.percentVarMean / trendToElaborate.countForPercentVar;
 
-		return finalResultString #formed by printing the newly calculated values, sector and year
+		    String newOutput = #concat of previous values in a readable form
 
-                                    });
+		    String sector = trendToElaborate.sector
+		    String year = trendToElaborate.year
 
-printToTextFile(finalResultString)
+		    if(map.contains(sector) { #if map already has a an entry for that sector
+			tmpOutput = map.get(sector).append(newOutput) #appends the new result to the old one creating a string, aggregated by sector
+			map.replace(sector,tmpOutput) 
+			}
+		    else{ #map doesn't have an entry for that sector
+			map.put(sector, newOutput) 
+			}
+	
+		print finalResultString #formed by printing the newly calculated values, sector and year in the form of
+			"Risultati per il settore :" + sector + map.valuesForKey(sector)
+}
+
+
 closeSparkContext()
 }
 
