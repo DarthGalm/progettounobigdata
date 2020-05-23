@@ -1,8 +1,10 @@
+#this is the second class of Job 3
+
 class MeanByName {
 
 class MapperMean {
 	#mapper simply removes the ticker key and substitutes it with company name for next reducer
-	function map(key, value, context){
+	function map(key, values, context){
 		cols = value.split(";")#different from before, comes from previous reducer
 		checkForErrorInCols() #checks if cols.length != 5, there's an error
 		emit(companyNameAsKey, pricesForEveryYearAsValue)
@@ -10,8 +12,8 @@ class MapperMean {
 }
 
 class ReducerMean {
-	#reducer gets all companies and does the mean
-	function reducer(key, value, context) {
+	#reducer gets all companies and does the mean, as I have something like "K=CompanyName, Values=[2016:n;2017:m;2018:x]"
+	function reducer(key, values, context) {
 		declares and inits sum2016, sum2017, sum2018 and recordCount
 		for(val in values) {
 			#parses and assigns values for years to variables
@@ -30,6 +32,7 @@ class ReducerMean {
 			#forms string with year and average of percent var.
 			string2016 = ("2016" + avg2016)
 			#same for 2017 and 2018
+			#I don't need to specify the year, as it's ordered and I know it's 2016, 2017 and 2018
 			outputvalue = String.format("%s;%s;%s", string2016, string2017, string2018)
 			emit(key, outputValue) 
 		} else {
