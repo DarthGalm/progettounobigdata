@@ -1,22 +1,24 @@
+#this contains the main method to be executed
+
 class JobThreeDriver {
 
 function main(args) {
-	#job 1
+	#job 1 is JoinMR
 	job1conf init 
 	job1conf.addInput(args[0], args[1]) //to read files via terminal
 	job1conf add mapper and reducer as JoinMR classes
 	job1conf job1outputpath = args[2] + /joinresult/ #intermediate result
 
-	#job 2
+	#job 2 is MeanByName
 	job2conf init 
 	job2conf.addInput(job1outputpath) //previously calculated values
-	job2conf add mapper and reducer as MeanByname classes
+	job2conf add mapper and reducer as MeanByName classes
 	job2conf job2outputpath = args[2] + /meanresult/ #intermediate result
 
-	#job 3
+	#job 3 is CompaniesCombiner
 	job3conf init 
 	job3conf.addInput(job2outputpath]) //to read files via terminal
-	job3conf add mapper and reducer as JoinMR classes
+	job3conf add mapper and reducer as CompaniesCombiner classes
 	job3conf finaloutputpath = args[2] + /finalresult/ #final result
 
 	boolean finalSuccess = finalJob.waitForCompletion(true);
