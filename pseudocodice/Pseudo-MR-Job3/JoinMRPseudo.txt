@@ -1,3 +1,5 @@
+#first executed class of Job 3
+
 class Stock #simple support class to help getting 
             #the elements of split row,   
             #without having to remember the exact position
