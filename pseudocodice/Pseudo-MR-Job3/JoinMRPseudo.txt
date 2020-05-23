@@ -17,7 +17,7 @@ class JoinMR {
 			cols = value.split(",") # split of every row to obtain all values
 			#checks for length and ticker, otherwise prints error
 			filterForDateAfter2008(cols.date) #only 2008 onwards
-			emit(tickerAsKey, "hsp" + closepriceDateAsValue) 
+			emit(tickerAsKey, "hsp" + closepriceDateAsValue) #hsp added for joining later, to distinguish data
 	    }										
 	}
 #this emits in the MR context ticker as key and company name as value
@@ -29,7 +29,7 @@ class JoinMR {
 	 	 #splitting for "," splits name internally, if more than 5 splits, add the second part of the name	
 				if(cols.length>5) 
 					addSecondPartToCompanyName() 
-			emits(tickerAsKey, "hs" + companyNameAsValue)
+			emits(tickerAsKey, "hs" + companyNameAsValue) #hs added for joining later, to distinguish data
 		}
 	}
 	class ReducerJoin { #this acts as a join between the datasets
@@ -39,15 +39,15 @@ class JoinMR {
 			declare and init maxDate2016, minDate2016, ..., minDate2018
 			
 			for(val in values) {
-				cols = val.split(",")
+				cols = val.split(",") #splits the data as fields are separated by ","
 				if(val[0].equals("hsp")){ #I'm elaborating historical stock prices data
 					year = getYearOf(val.date) #parses date and gets only the year
 					switch(year)
 						case 2016:
-							if((min2016 && max2016) == 0) #prima passata
+							if((min2016 && max2016) == 0) #first pass
 							#initialize values for minimum and maximum date and price
 								initMinAndMaxValues2016()
-							else { #seconda passata
+							else { #second pass
 								if(cols.date < minDate2016) {
 									minPrice2016 = cols.price
 									minDate2016 = cols.date}
@@ -58,6 +58,7 @@ class JoinMR {
 						break;
 						case 2017: #does the same as before, only for 2017
 						case 2018: #does the same as before, only for 2018
+						default: print(#error message)
 				}
 				else if(val[0].equals("hs")){#I'm elaborating historical stocks
 					String companyName = cols[1]	
