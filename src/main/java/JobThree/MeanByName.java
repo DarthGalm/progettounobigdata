@@ -19,7 +19,6 @@ public class MeanByName {
 
             Text companyName = new Text();
             Text pricesData = new Text();
-            //Text historicalStocksData = new Text();
             //il check potrebbe essere inutile dato che provendo da dati creati da me, puliti
             if (cols.length == 5) {
                 companyName.set((cols[4]));
@@ -34,7 +33,6 @@ public class MeanByName {
 
     public static class ReducerMean extends Reducer<Text, Text, Text, Text> {
 
-        //private TreeMap<Double, Text> sortMap = new TreeMap<Double, Text>(Collections.<Double>reverseOrder());
 
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
@@ -45,10 +43,10 @@ public class MeanByName {
 
             for (Text val : values) { //formato è anno:valore per tutti gli anni
                 String[] cols = StringUtils.getStrings(val.toString(), delim);
-                //substring di 5 perchè tolgo il numero dell' anno, e rimuovo la "," per la convenzione italiana
-                sum2016 += Long.parseLong(cols[0].substring(5)/*.replaceAll(",", ".")*/);
-                sum2017 += Long.parseLong(cols[1].substring(5)/*.replaceAll(",", ".")*/);
-                sum2018 += Long.parseLong(cols[2].substring(5)/*.replaceAll(",", ".")*/);
+                //substring di 5 perchè tolgo il numero dell' anno
+                sum2016 += Long.parseLong(cols[0].substring(5));
+                sum2017 += Long.parseLong(cols[1].substring(5));
+                sum2018 += Long.parseLong(cols[2].substring(5));
                 recordCount++;
             }
 
@@ -64,9 +62,6 @@ public class MeanByName {
             }
 
             if((avg2016 != 0) || (avg2017 != 0) || (avg2018 != 0)) {
-                /*String yearAndVariation2016 = String.format("2016:%.2f", Double.isNaN(avg2016) ? 0 : avg2016);
-                String yearAndVariation2017 = String.format("2017:%.2f", Double.isNaN(avg2017) ? 0 : avg2017);
-                String yearAndVariation2018 = String.format("2018:%.2f", Double.isNaN(avg2018) ? 0 : avg2018);*/
 
                 String yearAndVariation2016 = String.format("2016:%d", avg2016);
                 String yearAndVariation2017 = String.format("2017:%d", avg2017);
